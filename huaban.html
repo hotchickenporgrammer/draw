@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>画板</title>
+</head>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+    }
+
+    #draw {
+        box-sizing: border-box;
+        position: fixed;
+        /* width: 100vw;
+        height: 100vh; */
+        cursor: crosshair;
+        z-index: -1;
+    }
+</style>
+
+<body>
+    <canvas id="draw"></canvas>
+    <div>
+        <button id="eraser">clear</button>
+        <button id="pen">draw</button>
+    </div>
+</body>
+<script>
+    const canvas = document.getElementById('draw')
+    const eraser = document.getElementById("eraser");
+    const pen = document.getElementById("pen");
+
+    const ctx = canvas.getContext('2d')
+    let pageWidth = document.documentElement.clientWidth;
+    let pageHeight = document.documentElement.clientHeight;
+
+    canvas.width = pageWidth;
+    canvas.height = pageHeight;
+
+    let painting = false
+    let clear = false;
+    canvas.addEventListener('mousedown', drawDown)
+    canvas.addEventListener('mouseup', drawUp)
+    canvas.addEventListener('mousemove', drawLine)
+    canvas.addEventListener('touchstart', drawDown)
+    canvas.addEventListener('touchend', drawUp)
+    canvas.addEventListener('touchmove', drawLine)
+
+    eraser.addEventListener('click', function(){
+        clear = true
+    })
+    pen.addEventListener('click', function(){
+        clear = false
+    })
+
+    function drawLine(e) {
+        if (!painting) return
+        if(clear){
+            ctx.save();
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.stroke();
+            ctx.closePath();
+            ctx.clip();
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.restore();
+        } else {
+            ctx.lineWidth = 2
+            ctx.lineCap = 'round'
+            ctx.lineTo(e.clientX, e.clientY)
+            ctx.stroke()
+            ctx.moveTo(e.clientX, e.clientY)
+        }
+
+
+    }
+
+    function drawDown(e) {
+        painting = true
+        drawLine(e)
+    }
+
+    function drawUp() {
+        painting = false
+        ctx.beginPath()
+
+    }
+</script>
+
+</html>
